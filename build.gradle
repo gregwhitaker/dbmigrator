@@ -3,13 +3,16 @@ plugins {
     id "java"
     id "application"
     id "maven-publish"
-    id "com.avast.gradle.docker-compose"    version "0.10.9"
-    id "org.unbroken-dome.test-sets"        version "3.0.1"
-    id "com.adarshr.test-logger"            version "2.1.0"
+    id "com.avast.gradle.docker-compose"                    version "0.10.9"
+    id "org.unbroken-dome.test-sets"                        version "3.0.1"
+    id "com.adarshr.test-logger"                            version "2.1.0"
+    id "com.github.gregwhitaker.dbmigrator.flywayutils"
 }
 
 // Project Configuration
 project.description = "Manages database migration scripts and database versioning"
+project.group       = "com.github.gregwhitaker"
+project.version     = "0.1.0"
 project.ext.name    = "dbmigrator"
 project.ext.scm     = ""
 project.ext.url     = ""
@@ -21,7 +24,7 @@ project.mainClassName = "com.github.gregwhitaker.dbmigrator.DatabaseMigrator"
 project.ext.databaseJdbcUrl = "jdbc:postgres://localhost:5432/postgres"
 project.ext.databaseEnv     = "local"
 project.ext.databaseUser    = "postgres"
-project.ext.databasePwd     = ""
+project.ext.databasePwd     = "changeme"
 
 // Dependency Management
 repositories {
@@ -51,6 +54,12 @@ dependencies {
     testImplementation "org.reflections:reflections:0.9.12"
 
     testAnnotationProcessor "org.projectlombok:lombok:1.18.12"
+}
+
+// Artifacts
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 // Integration Testing

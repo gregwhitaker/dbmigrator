@@ -1,0 +1,19 @@
+plugins {
+    id "java"
+    id "groovy"
+}
+
+// Dependency Management
+repositories {
+    jcenter()
+    mavenCentral()
+}
+
+dependencies {
+    implementation gradleApi()
+
+    implementation 'com.squareup:javapoet:1.13.0'
+    implementation 'info.picocli:picocli:4.1.4'
+    implementation 'org.apache.commons:commons-lang3:3.11'
+    implementation 'org.flywaydb:flyway-core:6.0.8'
+}
