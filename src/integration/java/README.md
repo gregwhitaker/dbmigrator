@@ -7,8 +7,8 @@ Integration tests are **REQUIRED** for all tables. The build will fail if a tabl
 ## Directory Structure
 The integration test directory has the following structure. Please place tests in the appropriate directory:
 
-* [schema](/java/com/github/gregwhitaker/dbmigrator/schema) - Integration tests that apply to all tables in the entire schema.
-* [table](/java/com/github/gregwhitaker/dbmigrator/table) - Integration tests that apply to a single table within the schema.
+* [schema](../java/com/github/gregwhitaker/dbmigrator/schema) - Integration tests that apply to all tables in the entire schema.
+* [table](../java/com/github/gregwhitaker/dbmigrator/table) - Integration tests that apply to a single table within the schema.
 
 ## Adding a New Table Integration Test
 Follow the steps below to add a new table integration test to the project.
@@ -26,7 +26,7 @@ Follow the steps below to add a new table integration test to the project.
    ./gradlew generateTableIntegTest --args="--table-name=cp_global_product --project-dir=/Users/greg/workspace/dbmigrator"
    ```
    
-3. Add the newly created integration test to the [IntegrationTestSuite](/java/com/github/gregwhitaker/dbmigrator/IntegrationTestSuite.java) `SuiteClasses`
+3. Add the newly created integration test to the [IntegrationTestSuite](../java/com/github/gregwhitaker/dbmigrator/IntegrationTestSuite.java) `SuiteClasses`
 annotation.
 
 ## Running Integration Tests
