@@ -17,8 +17,8 @@ project.description = "Manages database migration scripts and database versionin
 project.group       = "com.github.gregwhitaker"
 project.version     = "0.1.0"
 project.ext.name    = "dbmigrator"
-project.ext.scm     = ""
-project.ext.url     = ""
+project.ext.scm     = "scm:git@github.com/gregwhitaker/dbmigrator.git"
+project.ext.url     = "https://github.com/gregwhitaker/dbmigrator.git"
 
 // Application Configuration
 project.mainClassName = "com.github.gregwhitaker.dbmigrator.DatabaseMigrator"
