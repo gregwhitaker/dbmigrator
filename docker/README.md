@@ -1,8 +1,8 @@
 # docker
 Docker compose configurations for working the Database Migrator.
 
-* [docker-compose.yml](docker-compose.yml) - Compose file that starts the MySQL database.
-* [docker-compose-all.yml](docker-compose-all.yml) - Compose file that starts both the MySQL database and the Database Migrator.
+* [docker-compose-postgres.yml](docker-compose-postgres.yml) - Compose file that starts the PostgreSQL database.
+* [docker-compose-all.yml](docker-compose-all.yml) - Compose file that starts both the PostgreSQL database and the Database Migrator.
 
 ## Running with Compose
 Run the following command to start the database only:
