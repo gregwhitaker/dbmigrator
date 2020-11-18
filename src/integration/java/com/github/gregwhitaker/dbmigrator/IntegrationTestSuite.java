@@ -1,5 +1,6 @@
 package com.github.gregwhitaker.dbmigrator;
 
+import com.github.gregwhitaker.dbmigrator.schema.IntegrationSanityCheckTest;
 import com.github.gregwhitaker.dbmigrator.schema.SchemaIntegrationTest;
 import com.github.gregwhitaker.dbmigrator.util.DataSourceHelper;
 import org.junit.AfterClass;
@@ -18,6 +19,9 @@ import org.slf4j.LoggerFactory;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
         // Add new table integration test classes here
+
+        // Add new schema integration test classes here
+        IntegrationSanityCheckTest.class,
         SchemaIntegrationTest.class
 })
 public class IntegrationTestSuite {
