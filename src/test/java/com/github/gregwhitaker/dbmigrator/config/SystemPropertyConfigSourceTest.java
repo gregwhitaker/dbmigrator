@@ -23,6 +23,9 @@ public class SystemPropertyConfigSourceTest {
     public final ProvideSystemProperty dbEnvSystemProp = new ProvideSystemProperty("db.env", "db-env");
 
     @Rule
+    public final ProvideSystemProperty dbEnvSpringSystemProp = new ProvideSystemProperty("spring.profiles.active", "db-env-spring");
+
+    @Rule
     public final ProvideSystemProperty dbCleanMigrateSystemProp = new ProvideSystemProperty("db.cleanMigrate", "true");
 
     @Rule
@@ -33,12 +36,28 @@ public class SystemPropertyConfigSourceTest {
 
     @Test
     public void shouldSetConfigurationFromSystemProperties() {
+        System.clearProperty("spring.profiles.active");
+
         final DatabaseMigratorConfig config = DatabaseMigratorConfig.get();
 
         assertEquals(config.getJdbcUrl(), "db-jdbc-url");
         assertEquals(config.getUsername(), "db-username");
         assertEquals(config.getPassword(), "db-password");
         assertEquals(config.getEnvironment(), "db-env");
+        assertTrue(config.isCleanMigrate());
+        assertFalse(config.isCleanNoMigrate());
+    }
+
+    @Test
+    public void shouldSetEnvironmentFromSpringBootActiveProfilesProperty() {
+        System.clearProperty("db.env");
+
+        final DatabaseMigratorConfig config = DatabaseMigratorConfig.get();
+
+        assertEquals(config.getJdbcUrl(), "db-jdbc-url");
+        assertEquals(config.getUsername(), "db-username");
+        assertEquals(config.getPassword(), "db-password");
+        assertEquals(config.getEnvironment(), "db-env-spring");
         assertTrue(config.isCleanMigrate());
         assertFalse(config.isCleanNoMigrate());
     }
