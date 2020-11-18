@@ -86,5 +86,5 @@ to execute the integration tasks locally:
 
     ./gradlew clean build integrationTest
     
-For more information on adding integration tests, please refer to the [Integration Test Documentation](../src/integration/README.md).
+For more information on adding integration tests, please refer to the [Integration Test Documentation](/src/integration/README.md).
 
