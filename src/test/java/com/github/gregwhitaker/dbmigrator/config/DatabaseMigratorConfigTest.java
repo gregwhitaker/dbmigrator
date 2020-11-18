@@ -73,4 +73,18 @@ public class DatabaseMigratorConfigTest {
         assertTrue(config.isCleanMigrate());
         assertFalse(config.isCleanNoMigrate());
     }
+
+    @Test(expected = MissingConfigurationException.class)
+    public void shouldThrowExceptionIfNoJdbcUrlConfigured() {
+        System.clearProperty("db.jdbcUrl");
+
+        final String[] args = new String[]{
+                "--username", "db-username-cl",
+                "--password", "db-password-cl",
+                "--env", "db-env-cl",
+                "--clean-migrate"
+        };
+
+        final DatabaseMigratorConfig config = DatabaseMigratorConfig.get(args);
+    }
 }
