@@ -18,6 +18,13 @@ import static org.junit.Assert.assertTrue;
  */
 public class SchemaIntegrationTest {
 
+    /**
+     * List of all expected table names in the database schema.
+     */
+    private static final List<String> EXPECTED_TABLE_NAMES = Arrays.asList(
+            "flyway_schema_history"
+    );
+
     @Test
     public void shouldHaveSuccessfullyExecutedAllMigrations() throws SQLException {
         try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
@@ -44,7 +51,7 @@ public class SchemaIntegrationTest {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     rs.next();
-                    assertEquals(25, rs.getInt("num_tables"));
+                    assertEquals(EXPECTED_TABLE_NAMES.size(), rs.getInt("num_tables"));
                 }
             }
         }
@@ -52,10 +59,6 @@ public class SchemaIntegrationTest {
 
     @Test
     public void shouldHaveCorrectTableNames() throws SQLException {
-        final List<String> tableNames = Arrays.asList(
-                "flyway_schema_history"
-        );
-
         try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
             final String sql = String.format("SELECT table_name " +
                     "FROM   information_schema.tables " +
@@ -64,7 +67,7 @@ public class SchemaIntegrationTest {
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
-                        assertTrue(tableNames.contains(rs.getString("table_name")));
+                        assertTrue(EXPECTED_TABLE_NAMES.contains(rs.getString("table_name")));
                     }
                 }
             }

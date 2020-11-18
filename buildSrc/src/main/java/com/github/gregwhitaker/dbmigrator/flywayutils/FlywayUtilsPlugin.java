@@ -7,7 +7,7 @@ import org.gradle.api.Project;
  * Plugin that adds helpful utilities for working with Flyway database migrations.
  */
 public class FlywayUtilsPlugin implements Plugin<Project> {
-    public static final String GROUP_NAME = "Database Migration Utils";
+    public static final String GROUP_NAME = "Database Migration";
 
     @Override
     public void apply(Project project) {
