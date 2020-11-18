@@ -4,8 +4,8 @@ Utility for managing database migration scripts and versioning.
 ## Project Structure
 Migrations are stored in the following directories (please refer to the links below for more information):
 
-* [Flyway Script Migrations](../src/main/resources/db) - Migration scripts both universal and environment-specific.
-* [Flyway Java Migrations](../src/main/java/db/migration) - Java-based migrations.
+* [Flyway Script Migrations](/src/main/resources/db) - Migration scripts both universal and environment-specific.
+* [Flyway Java Migrations](/src/main/java/db/migration) - Java-based migrations.
 
 ## Development
 Common tasks for developing and testing migrations locally are detailed below:
@@ -86,5 +86,5 @@ to execute the integration tasks locally:
 
     ./gradlew clean build integrationTest
     
-For more information on adding integration tests, please refer to the [Integration Test Documentation](../src/integrationTest/README.md).
+For more information on adding integration tests, please refer to the [Integration Test Documentation](../src/integration/README.md).
 
