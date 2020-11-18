@@ -1,0 +1,4 @@
+rootProject.name = 'dbmigrator'
+include 'gradle-dbmigrator-plugin'
+include 'gradle-dbmigrator-plugin-example'
+
