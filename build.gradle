@@ -75,7 +75,7 @@ task generateTableIntegTest (type: JavaExec, group: 'Test') {
     description('Generates an integration test skeleton for a database table.')
     dependsOn('migrateDb')
     main = 'com.github.gregwhitaker.dbmigrator.util.TableIntegTestCreator'
-    classpath = sourceSets.integrationTest.runtimeClasspath
+    classpath = sourceSets.integration.runtimeClasspath
 }
 
 // Docker Compose
