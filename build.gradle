@@ -1,9 +1,12 @@
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
 plugins {
     id "idea"
     id "java"
     id "application"
     id "maven-publish"
     id "com.avast.gradle.docker-compose"                    version "0.10.9"
+    id "com.bmuschko.docker-remote-api"                     version "3.4.4"
     id "org.unbroken-dome.test-sets"                        version "3.0.1"
     id "com.adarshr.test-logger"                            version "2.1.0"
     id "com.github.gregwhitaker.dbmigrator.flywayutils"
@@ -66,12 +69,24 @@ java {
 testSets {
     integration
 }
+integration.include("**/IntegrationTestSuite.*")
 
 // Docker Compose
 dockerCompose {
     useComposeFiles = [ "${projectDir}/docker/docker-compose-postgres.yml" ]
 }
 dockerCompose.isRequiredBy(integration)
+
+// Docker
+task buildImage(type: DockerBuildImage) {
+    dependsOn('build')
+    mustRunAfter('build')
+    description('Builds the executable jar version of the application as a Docker image.')
+    buildArgs = ['APP_NAME': "${project.ext.name}-${version}"]
+    dockerFile = file("${projectDir}/src/docker/Dockerfile")
+    inputDir = file("${projectDir}")
+    tags = ["${project.group}/${project.ext.name}", "${project.group}/${project.ext.name}:${version}"]
+}
 
 // Local Development
 task cleanDb (type: JavaExec, group: 'Database Migration') {
