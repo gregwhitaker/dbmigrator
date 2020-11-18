@@ -19,7 +19,7 @@ public class DatabaseMigrator {
     /**
      * Runs a database migration from the command line.
      *
-     * @param args
+     * @param args command line arguments
      */
     public static void main(String... args) {
         EnvOpts.parse();
