@@ -71,6 +71,13 @@ testSets {
 }
 integration.include("**/IntegrationTestSuite.*")
 
+task generateTableIntegTest (type: JavaExec, group: 'Test') {
+    description('Generates an integration test skeleton for a database table.')
+    dependsOn('migrateDb')
+    main = 'com.github.gregwhitaker.dbmigrator.util.TableIntegTestCreator'
+    classpath = sourceSets.integrationTest.runtimeClasspath
+}
+
 // Docker Compose
 dockerCompose {
     useComposeFiles = [ "${projectDir}/docker/docker-compose-postgres.yml" ]
