@@ -61,7 +61,7 @@ public abstract class BaseTableIntegrationTest {
     public void shouldHaveCorrectColumnDataTypes() throws SQLException {
         getColumnInfo().forEach((s, columnInformation) -> {
             final ExpectedColumnInformation expectedColumnInformation = expectedColumnInfo.get(s);
-            assertEquals(String.format("Incorrect column type for: %s", s), expectedColumnInformation.getColumnType(), columnInformation.getColumnType());
+            assertEquals(String.format("Incorrect column type for: %s", s), expectedColumnInformation.getColumnType(), columnInformation.getUdtName());
         });
     }
 
@@ -106,14 +106,18 @@ public abstract class BaseTableIntegrationTest {
             primaryKeys = new ArrayList<>();
 
             try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
-                final String sql = String.format("SELECT key_column_usage.column_name " +
-                        "FROM   information_schema.key_column_usage " +
-                        "WHERE  table_schema = '%s' " +
-                        "AND    constraint_name = 'PRIMARY' " +
-                        "AND    table_name = ?", DataSourceHelper.DEFAULT_SCHEMA);
+                final String sql =
+                        "SELECT     c.column_name, c.ordinal_position " +
+                        "FROM       information_schema.key_column_usage AS c " +
+                        "LEFT JOIN  information_schema.table_constraints AS t ON t.constraint_name = c.constraint_name " +
+                        "WHERE      t.table_schema = ? " +
+                        "AND        t.table_name = ? " +
+                        "AND        t.constraint_type = 'PRIMARY KEY' " +
+                        "ORDER BY   c.ordinal_position";
 
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, tableName);
+                    ps.setString(1, DataSourceHelper.DEFAULT_SCHEMA);
+                    ps.setString(2, tableName);
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
@@ -138,13 +142,15 @@ public abstract class BaseTableIntegrationTest {
             columnNames = new ArrayList<>();
 
             try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
-                final String sql = String.format("SELECT column_name " +
+                final String sql =
+                        "SELECT column_name " +
                         "FROM   information_schema.columns " +
-                        "WHERE  table_schema = '%s' " +
-                        "AND    table_name = ?", DataSourceHelper.DEFAULT_SCHEMA);
+                        "WHERE  table_schema = ? " +
+                        "AND    table_name = ?";
 
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, tableName);
+                    ps.setString(1, DataSourceHelper.DEFAULT_SCHEMA);
+                    ps.setString(2, tableName);
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
@@ -169,13 +175,15 @@ public abstract class BaseTableIntegrationTest {
             columnInfo = new HashMap<>();
 
             try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
-                final String sql = String.format("SELECT * " +
+                final String sql =
+                        "SELECT * " +
                         "FROM   information_schema.columns " +
-                        "WHERE  table_schema = '%s' " +
-                        "AND    table_name = ?", DataSourceHelper.DEFAULT_SCHEMA);
+                        "WHERE  table_schema = ? " +
+                        "AND    table_name = ?";
 
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, tableName);
+                    ps.setString(1, DataSourceHelper.DEFAULT_SCHEMA);
+                    ps.setString(2, tableName);
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
@@ -188,9 +196,8 @@ public abstract class BaseTableIntegrationTest {
                                             rs.getString("column_default"),
                                             rs.getString("is_nullable").equalsIgnoreCase("YES"),
                                             rs.getString("data_type"),
-                                            rs.getString("column_type"),
-                                            rs.getString("column_key"),
-                                            rs.getString("extra")
+                                            rs.getLong("character_maximum_length"),
+                                            rs.getString("udt_name")
                                     )
                             );
                         }
@@ -213,18 +220,38 @@ public abstract class BaseTableIntegrationTest {
             foreignKeyRelationships = new ArrayList<>();
 
             try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
-                final String sql = String.format("SELECT table_name, column_name, constraint_name, referenced_table_name, referenced_column_name " +
-                        "FROM   information_schema.key_column_usage " +
-                        "WHERE  referenced_table_schema = '%s' " +
-                        "AND    table_name = ?", DataSourceHelper.DEFAULT_SCHEMA);
+                final String sql =
+                    "SELECT " +
+                            "att2.attname AS column_name, " +
+                            "cl.relname AS referenced_table_name, " +
+                            "att.attname AS referenced_column_name, " +
+                            "conname AS constraint_name " +
+                    "FROM " +
+                            "(SELECT " +
+                                    "unnest(con1.conkey) AS parent, " +
+                                    "unnest(con1.confkey) AS child, " +
+                                    "con1.confrelid, " +
+                                    "con1.conrelid, " +
+                                    "con1.conname " +
+                                    "FROM pg_class cl " +
+                                    "JOIN pg_namespace ns ON cl.relnamespace = ns.oid " +
+                                    "JOIN pg_constraint con1 ON con1.conrelid = cl.oid " +
+                                    "WHERE cl.relname = ? " +
+                                    "AND ns.nspname = ? " +
+                                    "AND con1.contype = 'f' " +
+                            ") con " +
+                    "JOIN pg_attribute att ON att.attrelid = con.confrelid AND att.attnum = con.child " +
+                    "JOIN pg_class cl ON cl.oid = con.confrelid " +
+                    "JOIN pg_attribute att2 ON att2.attrelid = con.conrelid AND att2.attnum = con.parent";
 
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
                     ps.setString(1, tableName);
+                    ps.setString(2, DataSourceHelper.DEFAULT_SCHEMA);
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
                             foreignKeyRelationships.add(new ForeignKeyRelationship(
-                                    rs.getString("table_name"),
+                                    tableName,
                                     rs.getString("column_name"),
                                     rs.getString("constraint_name"),
                                     rs.getString("referenced_table_name"),
@@ -240,9 +267,9 @@ public abstract class BaseTableIntegrationTest {
     }
 
     /**
-     * Gets index on the current table (excluding primary key auto-generated indexes).
+     * Gets indexes on the current table.
      *
-     * @return indexes
+     * @return list of {@link IndexInformation}
      * @throws SQLException
      */
     protected List<IndexInformation> getIndexes() throws SQLException {
@@ -250,24 +277,44 @@ public abstract class BaseTableIntegrationTest {
             indexes = new ArrayList<>();
 
             try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
-                final String sql = String.format("SELECT * " +
-                        "FROM   information_schema.statistics " +
-                        "WHERE  table_schema = '%s' " +
-                        "AND    table_name = ? " +
-                        "AND    index_name != 'PRIMARY'", DataSourceHelper.DEFAULT_SCHEMA);
+                final String sql =
+                        "SELECT " +
+                            "ns.nspname AS table_schema, " +
+                            "idx.indrelid :: REGCLASS AS table_name, " +
+                            "i.relname AS index_name, " +
+                            "idx.indisunique AS is_unique, " +
+                            "idx.indisprimary AS is_primary, " +
+                            "ARRAY( " +
+                                    "SELECT pg_get_indexdef(idx.indexrelid, k + 1, TRUE) " +
+                                    "FROM generate_subscripts(idx.indkey, 1) AS k " +
+                                    "ORDER BY k " +
+                            ") AS column_names, " +
+                            "(idx.indexprs IS NOT NULL) OR (idx.indkey::int[] @> array[0]) AS is_functional, " +
+                            "idx.indpred IS NOT NULL AS is_partial " +
+                        "FROM pg_index AS idx " +
+                        "JOIN pg_class AS i ON i.oid = idx.indexrelid " +
+                        "JOIN pg_am AS am ON i.relam = am.oid " +
+                        "JOIN pg_namespace AS ns ON i.relnamespace = ns.OID " +
+                        "JOIN pg_user AS U ON i.relowner = u.usesysid " +
+                        "WHERE NOT nspname LIKE ? " +
+                        "AND idx.indrelid = (SELECT ?::regclass::oid) " +
+                        "AND idx.indisprimary = false";
 
                 try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                    ps.setString(1, tableName);
+                    ps.setString(1, DataSourceHelper.DEFAULT_SCHEMA);
+                    ps.setString(2, tableName);
 
                     try (ResultSet rs = ps.executeQuery()) {
                         while (rs.next()) {
                             indexes.add(new IndexInformation(
                                     rs.getString("table_schema"),
                                     rs.getString("table_name"),
-                                    rs.getInt("non_unique"),
-                                    rs.getString("index_schema"),
                                     rs.getString("index_name"),
-                                    rs.getString("column_name")
+                                    rs.getBoolean("is_unique"),
+                                    rs.getBoolean("is_primary"),
+                                    (String[]) rs.getArray("column_names").getArray(),
+                                    rs.getBoolean("is_functional"),
+                                    rs.getBoolean("is_partial")
                             ));
                         }
                     }
@@ -295,9 +342,8 @@ public abstract class BaseTableIntegrationTest {
         private String columnDefault;
         private Boolean isNullable;
         private String dataType;
-        private String columnType;
-        private String columnKey;
-        private String extra;
+        private Long characterMaximumLength;
+        private String udtName;
     }
 
     /**
@@ -337,9 +383,11 @@ public abstract class BaseTableIntegrationTest {
     public static class IndexInformation {
         private String tableSchema;
         private String tableName;
-        private Integer nonUnique;
-        private String indexSchema;
         private String indexName;
-        private String columnName;
+        private Boolean isUnique;
+        private Boolean isPrimary;
+        private String[] columnNames;
+        private Boolean isFunctional;
+        private Boolean isPartial;
     }
 }

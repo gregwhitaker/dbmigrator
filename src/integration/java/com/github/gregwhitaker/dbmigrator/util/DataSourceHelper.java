@@ -11,8 +11,8 @@ import javax.sql.DataSource;
 public final class DataSourceHelper {
     private static final DataSourceHelper INSTANCE = new DataSourceHelper();
 
-    public static final String DEFAULT_SCHEMA = "postgres";
-    public static final String DEFAULT_JDBC_URL = "jdbc:postgres://localhost:5432/" + DEFAULT_SCHEMA;
+    public static final String DEFAULT_SCHEMA = "public";
+    public static final String DEFAULT_JDBC_URL = "jdbc:postgresql://localhost:5432/postgres";
     public static final String DEFAULT_USERNAME = "postgres";
     public static final String DEFAULT_PASSWORD = "changeme";
 

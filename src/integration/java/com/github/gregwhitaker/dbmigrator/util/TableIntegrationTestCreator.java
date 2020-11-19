@@ -97,10 +97,10 @@ public class TableIntegrationTestCreator {
                 .forEach(entry -> {
                     if (entry.getValue().getColumnDefault() == null) {
                         staticBlockBuilder.add("$L.put($S, new ExpectedColumnInformation($S, $L));\n", "EXPECTED_COLUMNS",
-                                entry.getKey(), entry.getValue().columnType, entry.getValue().isNullable);
+                                entry.getKey(), entry.getValue().getUdtName(), entry.getValue().isNullable);
                     } else {
                         staticBlockBuilder.add("$L.put($S, new ExpectedColumnInformation($S, $L, $S));\n", "EXPECTED_COLUMNS",
-                                entry.getKey(), entry.getValue().columnType, entry.getValue().isNullable, entry.getValue().columnDefault);
+                                entry.getKey(), entry.getValue().getUdtName(), entry.getValue().isNullable, entry.getValue().columnDefault);
                     }
                 });
 
@@ -183,14 +183,14 @@ public class TableIntegrationTestCreator {
         final Map<String, ColumnInformation> columnInfo = new HashMap<>();
 
         try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
-            final String sql = String.format("SELECT * " +
-                    "FROM   information_schema.columns " +
-                    "WHERE  table_schema = '%s' " +
-                    "AND    table_name = ?"
-                    , DataSourceHelper.DEFAULT_SCHEMA);
+            final String sql = "SELECT * " +
+                            "FROM   information_schema.columns " +
+                            "WHERE  table_schema = ? " +
+                            "AND    table_name = ?";
 
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
-                ps.setString(1, tableName);
+                ps.setString(1, DataSourceHelper.DEFAULT_SCHEMA);
+                ps.setString(2, tableName);
 
                 try (ResultSet rs = ps.executeQuery()) {
                     while (rs.next()) {
@@ -203,9 +203,8 @@ public class TableIntegrationTestCreator {
                                         rs.getString("column_default"),
                                         rs.getString("is_nullable").equalsIgnoreCase("YES"),
                                         rs.getString("data_type"),
-                                        rs.getString("column_type"),
-                                        rs.getString("column_key"),
-                                        rs.getString("extra")
+                                        rs.getLong("character_maximum_length"),
+                                        rs.getString("udt_name")
                                 )
                         );
                     }
@@ -247,8 +246,7 @@ public class TableIntegrationTestCreator {
         private String columnDefault;
         private Boolean isNullable;
         private String dataType;
-        private String columnType;
-        private String columnKey;
-        private String extra;
+        private Long characterMaxLength;
+        private String udtName;
     }
 }

@@ -24,7 +24,7 @@ project.ext.url     = "https://github.com/gregwhitaker/dbmigrator.git"
 project.mainClassName = "com.github.gregwhitaker.dbmigrator.DatabaseMigrator"
 
 // Local Database Configuration
-project.ext.databaseJdbcUrl = "jdbc:postgres://localhost:5432/postgres"
+project.ext.databaseJdbcUrl = "jdbc:postgresql://localhost:5432/postgres"
 project.ext.databaseEnv     = "local"
 project.ext.databaseUser    = "postgres"
 project.ext.databasePwd     = "changeme"
