@@ -10,8 +10,7 @@ import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Tests for the entire database schema.
@@ -30,12 +29,12 @@ public class SchemaIntegrationTest {
         try (Connection conn = DataSourceHelper.getInstance().getDataSource().getConnection()) {
             final String sql = "SELECT COUNT(*) AS failed_migrations " +
                     "FROM   flyway_schema_history " +
-                    "WHERE  success != 1";
+                    "WHERE  success != TRUE";
 
             try (PreparedStatement ps = conn.prepareStatement(sql)) {
                 try (ResultSet rs = ps.executeQuery()) {
                     rs.next();
-                    assertEquals(0, rs.getInt("failed_migrations"));
+                    assertFalse(rs.getBoolean("failed_migrations"));
                 }
             }
         }

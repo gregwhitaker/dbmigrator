@@ -9,7 +9,9 @@ import org.gradle.api.tasks.TaskAction;
 import org.gradle.api.tasks.options.Option;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -54,6 +56,7 @@ public class CreateMigrationScript extends DefaultTask {
         try {
             if (!Files.exists(scriptPath)) {
                 scriptPath.toFile().createNewFile();
+                writeHeaderToScriptFile(scriptPath);
             }
         } catch (IOException e) {
             throw new GradleException("Error occurred while creating migration script", e);
@@ -101,6 +104,14 @@ public class CreateMigrationScript extends DefaultTask {
             } else {
                 throw new GradleException("No environment directory exist in 'migration-env' directory.");
             }
+        }
+    }
+
+    private void writeHeaderToScriptFile(Path scriptPath) throws IOException {
+        try (FileWriter fileWriter = new FileWriter(scriptPath.toFile());
+             PrintWriter printWriter = new PrintWriter(fileWriter)) {
+            printWriter.printf("-- Script: %s%n", scriptPath.toFile().getName());
+            printWriter.printf("-- Description: %s%n", getDesc());
         }
     }
 

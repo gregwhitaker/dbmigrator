@@ -48,6 +48,7 @@ public class FlywayScriptName {
     }
 
     private static final String DEFAULT_SCRIPT_NAME_FORMAT = "%s%s_%s__%s.sql";
+    private static final String REPEATABLE_SCRIPT_NAME_FORMAT = "R__%s.sql";
     private static final String DEFAULT_DATE_FORMAT = "yyyyMMddhhmmss";
 
     /**
@@ -95,11 +96,15 @@ public class FlywayScriptName {
             throw new IllegalArgumentException("Required argument missing or empty: description");
         }
 
-        return String.format(DEFAULT_SCRIPT_NAME_FORMAT,
-                type.getCode(),
-                formatVersion(version),
-                formattedDate(),
-                formatDescription(description));
+        if (type == Type.REPEATABLE) {
+            return String.format(REPEATABLE_SCRIPT_NAME_FORMAT, formatDescription(description));
+        } else {
+            return String.format(DEFAULT_SCRIPT_NAME_FORMAT,
+                    type.getCode(),
+                    formatVersion(version),
+                    formattedDate(),
+                    formatDescription(description));
+        }
     }
 
     private static String formatVersion(String version) {

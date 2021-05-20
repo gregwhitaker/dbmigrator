@@ -17,7 +17,7 @@ Follow the steps below to add a new table integration test to the project.
 
 2. Run `generateTableIntegTest` Gradle command to generate the skeleton of the new integration test. The task has the following arguments:
 
-    * `--project-dir` - Directory of the `catalog-channeledproductmanager-db-v1` project.
+    * `--project-dir` - Directory of the project.
     * `--table-name` - Name of the database table for which to generate an integration test.
     * `--force` - Optional argument to overwrite existing integration test. Defaults to `false`.
     

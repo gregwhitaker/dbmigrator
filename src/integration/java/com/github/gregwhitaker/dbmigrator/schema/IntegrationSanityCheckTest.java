@@ -6,6 +6,8 @@ import com.github.gregwhitaker.dbmigrator.util.DatabaseTableTest;
 import org.junit.Test;
 import org.junit.runners.Suite;
 import org.reflections.Reflections;
+import org.reflections.ReflectionsException;
+import org.reflections.scanners.TypeAnnotationsScanner;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -103,11 +105,15 @@ public class IntegrationSanityCheckTest {
     private List<String> getTableNamesFromIntegrationTests() {
         final List<String> tableNames = new ArrayList<>();
 
-        final Reflections reflections = new Reflections("com.github.gregwhitaker.dbmigrator.table");
-        reflections.getTypesAnnotatedWith(DatabaseTableTest.class).forEach(clazz -> {
-            DatabaseTableTest annotation = clazz.getAnnotation(DatabaseTableTest.class);
-            tableNames.add(annotation.tableName());
-        });
+        final Reflections reflections = new Reflections("com.github.gregwhitaker.dbmigrator.table", new TypeAnnotationsScanner());
+        try {
+            reflections.getTypesAnnotatedWith(DatabaseTableTest.class).forEach(clazz -> {
+                DatabaseTableTest annotation = clazz.getAnnotation(DatabaseTableTest.class);
+                tableNames.add(annotation.tableName());
+            });
+        } catch (ReflectionsException ignored) {
+            // Ignored
+        }
 
         return tableNames;
     }
